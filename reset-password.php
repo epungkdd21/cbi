@@ -20,7 +20,7 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
             </div>
             <h1 class="text-2xl font-bold text-blue-950 mb-2">Link Tidak Valid</h1>
             <p class="text-slate-600 mb-6">Tautan reset password Anda tidak valid atau telah kadaluarsa. Silakan minta reset password baru.</p>
-            <a href="login.php" class="inline-block bg-blue-900 hover:bg-blue-950 text-white font-bold px-6 py-3 rounded-xl">
+            <a href="/login" class="inline-block bg-blue-900 hover:bg-blue-950 text-white font-bold px-6 py-3 rounded-xl">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali ke Login
             </a>
         </div>
@@ -59,7 +59,7 @@ try {
                 </div>
                 <h1 class="text-2xl font-bold text-blue-950 mb-2">Tautan Kadaluarsa</h1>
                 <p class="text-slate-600 mb-6">Tautan reset password ini telah kadaluarsa. Silakan minta reset password baru.</p>
-                <a href="login.php" class="inline-block bg-blue-900 hover:bg-blue-950 text-white font-bold px-6 py-3 rounded-xl">
+                <a href="/login" class="inline-block bg-blue-900 hover:bg-blue-950 text-white font-bold px-6 py-3 rounded-xl">
                     <i class="fas fa-arrow-left mr-2"></i> Kembali ke Login
                 </a>
             </div>
@@ -280,7 +280,7 @@ try {
                     
                     // Redirect to login after 2 seconds
                     setTimeout(() => {
-                        window.location.href = 'login.php';
+                        window.location.href = '/login';
                     }, 2000);
                 } else {
                     errorText.textContent = data.message || 'Terjadi kesalahan.';

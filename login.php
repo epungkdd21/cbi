@@ -209,7 +209,7 @@ $csrf_token = generateCsrfToken();
                     // Hide error message
                     errorMsg.classList.add('hidden');
                     // Redirect to admin panel
-                    window.location.href = data.data.redirect;
+                    window.location.href = '/admin';
                 } else {
                     // Show error message
                     errorText.textContent = data.message || 'Login gagal. Silakan coba lagi.';

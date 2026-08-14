@@ -83,7 +83,7 @@ try {
 
     jsonResponse('success', 'Login berhasil', [
         'username' => $admin['username'],
-        'redirect' => 'admin.html',
+        'redirect' => '/admin',
     ]);
 
 } catch (Exception $e) {

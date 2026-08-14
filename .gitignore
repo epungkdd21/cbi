@@ -24,3 +24,6 @@ composer.lock
 *.tmp
 *.temp
 *~
+
+# Note: .htaccess should be committed to git (it's essential for URL rewriting)
+

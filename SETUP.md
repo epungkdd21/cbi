@@ -12,20 +12,58 @@ Panduan lengkap untuk setup sistem autentikasi admin dengan PHP + MySQL di Hosti
 - `api/reset-password.php` - Proses reset password
 
 ### Frontend Pages
-- `login.php` - Halaman login admin
-- `reset-password.php` - Halaman reset password
-- `admin.html` - Modified dengan session check & logout button
+- `login` - Halaman login admin (tanpa extension .php)
+- `reset-password` - Halaman reset password (tanpa extension .php)
+- `admin` - Admin panel (tanpa extension .html)
+- `index` / `/` - Public website (tanpa extension .html)
 
 ### Configuration & Database
 - `config.php` - ⚠️ **SENSITIVE** - Konfigurasi database & email
 - `db/schema.sql` - SQL schema untuk database
+
+### URL Rewriting
+- `.htaccess` - URL rewriting rules (remove .html dan .php extensions)
 
 ### Security
 - `.gitignore` - Exclude file sensitif dari git
 
 ---
 
-## ⚙️ LANGKAH-LANGKAH SETUP
+## 🔗 URL Rewriting Setup (.htaccess)
+
+File `.htaccess` telah dibuat untuk menyembunyikan extension file dari URL, membuat URL lebih clean dan SEO-friendly.
+
+### URL Mapping:
+| File | Old URL | New URL |
+|------|---------|---------|
+| index.html | `example.com/index.html` | `example.com/` |
+| login.php | `example.com/login.php` | `example.com/login` |
+| admin.html | `example.com/admin.html` | `example.com/admin` |
+| reset-password.php | `example.com/reset-password.php` | `example.com/reset-password` |
+
+### Features di .htaccess:
+✅ **URL Rewriting** - Hapus extension .html dan .php  
+✅ **Redirect Permanen** - .html/.php URLs redirect ke clean URLs  
+✅ **Security** - Protect config.php, schema.sql, .env files  
+✅ **Security Headers** - X-Content-Type-Options, X-Frame-Options, X-XSS-Protection  
+✅ **Cache Control** - Static assets cached 1 tahun  
+✅ **Deny Directories** - Disable directory listing  
+
+### Requirements:
+- Apache server (default di Hostinger)
+- `mod_rewrite` module enabled (biasanya sudah di Hostinger)
+- `.htaccess` file di root directory (sudah ada)
+
+### Test URL Rewriting:
+1. Upload `.htaccess` ke `/public_html/`
+2. Buka: `https://culturebridgeindonesia.my.id/login`
+3. ✅ Harusnya load halaman login tanpa error
+4. Buka: `https://culturebridgeindonesia.my.id/admin`
+5. ✅ Harusnya redirect ke login (karena belum authenticated)
+6. Buka: `https://culturebridgeindonesia.my.id/`
+7. ✅ Harusnya load index.html
+
+---
 
 ### **Fase 1: Persiapan Database (Hostinger)**
 
@@ -148,15 +186,15 @@ Atau tanyakan pada kami untuk membuat halaman registrasi admin pertama.
 ### **Fase 4: Test & Verifikasi**
 
 1. **Test Login Page**
-   - Buka: `https://culturebridgeindonesia.my.id/login.php`
+   - Buka: `https://culturebridgeindonesia.my.id/login`
    - Username: `admin`
    - Password: `password123` (atau password yang Anda set)
-   - ✅ Harusnya redirect ke `admin.html`
+   - ✅ Harusnya redirect ke `/admin`
 
 2. **Test Admin Panel**
    - Verifikasi username muncul di topbar
    - Klik dropdown → logout
-   - ✅ Harusnya redirect ke login page
+   - ✅ Harusnya redirect ke `/login`
 
 3. **Test Forgot Password**
    - Di login page, klik "Lupa Password?"
@@ -166,14 +204,20 @@ Atau tanyakan pada kami untuk membuat halaman registrasi admin pertama.
 4. **Test Password Reset**
    - Buka link dari email
    - Set password baru (minimal 8 karakter)
-   - Login dengan password baru
-   - ✅ Harusnya berhasil
+   - Login dengan password baru di `/login`
+   - ✅ Harusnya berhasil redirect ke `/admin`
 
 5. **Test Session Timeout**
-   - Login ke admin panel
+   - Login ke `/admin`
    - Tunggu 30 menit tanpa klik apapun
    - Refresh halaman
-   - ✅ Harusnya redirect ke login page
+   - ✅ Harusnya redirect ke `/login`
+
+6. **Test URL Rewriting**
+   - Buka: `https://culturebridgeindonesia.my.id/login.php`
+   - ✅ Harusnya auto-redirect ke `/login`
+   - Buka: `https://culturebridgeindonesia.my.id/admin.html`
+   - ✅ Harusnya auto-redirect ke `/admin`
 
 ---
 
@@ -181,11 +225,12 @@ Atau tanyakan pada kami untuk membuat halaman registrasi admin pertama.
 
 ```
 /workspaces/cbi/
-├── login.php                      # Halaman login (custom URL)
-├── reset-password.php             # Halaman reset password
-├── admin.html                     # Admin panel (modified dengan session check)
-├── index.html                     # Public website (unchanged)
+├── login.php                      # Halaman login → /login
+├── reset-password.php             # Halaman reset password → /reset-password
+├── admin.html                     # Admin panel → /admin (modified dengan session check)
+├── index.html                     # Public website → /
 ├── config.php                     # ⚠️ SENSITIVE - Database config
+├── .htaccess                      # URL rewriting rules (remove extensions)
 ├── .gitignore                     # Exclude file sensitif
 ├── api/
 │   ├── authenticate.php           # POST: Handle login
@@ -198,6 +243,13 @@ Atau tanyakan pada kami untuk membuat halaman registrasi admin pertama.
 └── logs/
     └── error.log                  # Log errors (auto-created)
 ```
+
+### URL Mapping:
+- `index.html` → `/` (homepage)
+- `login.php` → `/login` (admin login)
+- `admin.html` → `/admin` (admin panel)
+- `reset-password.php` → `/reset-password` (password recovery)
+- `api/*.php` → `/api/` (unchanged - API endpoints)
 
 ---
 
