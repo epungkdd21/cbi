@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Culture Bridge Indonesia</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .nav-active {
+            background-color: #1e293b;
+            color: #fbbf24;
+            border-left: 4px solid #fbbf24;
+        }
+        .nav-item {
+            border-left: 4px solid transparent;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-slate-900 text-slate-300 w-64 flex-shrink-0 hidden md:flex flex-col h-full z-20 absolute md:relative">
+        <div class="h-20 flex items-center px-6 border-b border-slate-800 bg-slate-950/50">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-700 to-indigo-500 flex items-center justify-center text-white font-black text-sm shadow-md mr-3">
+                CBI
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-none">Admin Panel</h1>
+                <p class="text-[10px] text-amber-400 font-medium tracking-widest uppercase mt-1">Culture Bridge</p>
+            </div>
+            <button id="close-sidebar" class="md:hidden ml-auto text-slate-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+            <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2">Menu Konten</p>
+            
+            <a href="#" onclick="switchTab('dashboard', this)" class="nav-item nav-active flex items-center gap-3 px-3 py-2.5 rounded-r-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-chart-pie w-5 text-center"></i>
+                <span class="font-medium">Dasbor</span>
+            </a>
+            <a href="#" onclick="switchTab('general', this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-r-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-globe w-5 text-center"></i>
+                <span class="font-medium">Identitas & Tagline</span>
+            </a>
+            <a href="#" onclick="switchTab('programs', this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-r-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-layer-group w-5 text-center"></i>
+                <span class="font-medium">Atur Program</span>
+            </a>
+            <a href="#" onclick="switchTab('gallery', this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-r-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-images w-5 text-center"></i>
+                <span class="font-medium">Atur Galeri</span>
+            </a>
+            <a href="#" onclick="switchTab('popup', this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-r-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fas fa-bullhorn w-5 text-center"></i>
+                <span class="font-medium">Pop-up Event</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800 space-y-2">
+            <a href="index.html" target="_blank" class="flex items-center gap-3 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm">
+                <i class="fas fa-external-link-alt w-5 text-center"></i>
+                <span>Lihat Website Utama</span>
+            </a>
+            <button onclick="resetDataToDefault()" class="flex items-center gap-3 w-full px-3 py-2 text-rose-400 hover:bg-rose-400/10 rounded-lg transition-colors text-sm">
+                <i class="fas fa-undo w-5 text-center"></i>
+                <span>Reset Data Default</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        <!-- Topbar -->
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-10">
+            <div class="flex items-center gap-4">
+                <button id="open-sidebar" class="md:hidden text-slate-500 hover:text-slate-700 text-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 class="text-lg font-bold text-slate-800" id="current-page-title">Dasbor Panel Admin</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Admin Profile Dropdown -->
+                <div class="relative" id="profile-dropdown">
+                    <button class="flex items-center gap-2 hover:bg-slate-100 p-2 rounded-lg transition-colors" onclick="toggleDropdown()">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold border border-blue-200" id="admin-avatar">
+                            A
+                        </div>
+                        <div class="hidden sm:block text-left">
+                            <p class="text-sm font-bold text-slate-800" id="admin-username">Admin</p>
+                            <p class="text-xs text-slate-500">Panel Admin</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs hidden sm:inline"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div id="dropdown-menu" class="hidden absolute right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden min-w-xs">
+                        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+                            <p class="text-sm font-semibold text-slate-700">Logged in as:</p>
+                            <p class="text-xs text-slate-500 mt-1" id="dropdown-username">Admin User</p>
+                        </div>
+                        <a href="index.html" target="_blank" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                            <i class="fas fa-eye text-slate-400 mr-2"></i> Lihat Website
+                        </a>
+                        <button onclick="logout()" class="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors border-t border-slate-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" id="content-area">
+            
+            <!-- 1. DASHBOARD SECTION -->
+            <div id="section-dashboard" class="content-section space-y-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-slate-800">Ringkasan Sistem</h3>
+                    <p class="text-slate-500 text-sm mt-1">Kelola seluruh konten halaman utama Culture Bridge Indonesia dengan mudah.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Program Tersimpan</p>
+                            <p class="text-3xl font-bold text-slate-800" id="count-programs">4</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Foto Galeri</p>
+                            <p class="text-3xl font-bold text-slate-800" id="count-gallery">6</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-2xl">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Status Pop-up</p>
+                            <p class="text-xl font-bold text-emerald-600 mt-1" id="status-popup-badge">Aktif</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-3xl p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-2">
+                        <span class="px-3 py-1 bg-amber-400 text-slate-950 font-bold text-xs rounded-full uppercase">Sinkronisasi Otomatis</span>
+                        <h4 class="text-2xl font-bold">Perubahan Tersimpan Instan</h4>
+                        <p class="text-slate-300 text-sm max-w-xl">Setiap data yang Anda ubah di panel ini akan langsung diperbarui saat Anda membuka kembali halaman utama website CBI.</p>
+                    </div>
+                    <a href="index.html" target="_blank" class="bg-white text-blue-950 hover:bg-slate-100 font-bold px-6 py-3.5 rounded-xl shadow-lg transition-all whitespace-nowrap">
+                        <i class="fas fa-eye mr-2"></i> Buka Preview Web
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. GENERAL / IDENTITAS & TAGLINE SECTION -->
+            <div id="section-general" class="content-section hidden space-y-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-slate-800">Identitas & Tagline Website</h3>
+                    <p class="text-slate-500 text-sm mt-1">Ubah nama perusahaan, nomor kontak WhatsApp, dan tagline bergaya tulisan tangan (handwriting).</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 max-w-2xl">
+                    <form id="general-form" onsubmit="saveGeneral(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Bisnis / Lembaga</label>
+                            <input type="text" id="gen-company" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Tagline Utama (Gaya Tulisan Tangan / Handwriting)</label>
+                            <input type="text" id="gen-tagline" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-['Caveat'] text-xl" required>
+                            <p class="text-xs text-slate-400 mt-1">Tagline ini akan muncul tepat di bawah logo navigasi utama.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor WhatsApp Utama (Format 62...)</label>
+                            <input type="text" id="gen-wa" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all">
+                                Simpan Perubahan Identitas
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3. PROGRAMS SECTION -->
+            <div id="section-programs" class="content-section hidden space-y-6">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-800">Atur Program Layanan</h3>
+                        <p class="text-slate-500 text-sm mt-1">Tambah, ubah, atau hapus program unggulan CBI.</p>
+                    </div>
+                    <button onclick="openProgramModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm">
+                        <i class="fas fa-plus"></i> Tambah Program Baru
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold">Ikon</th>
+                                    <th class="p-4 font-semibold">Nama Program</th>
+                                    <th class="p-4 font-semibold">Deskripsi</th>
+                                    <th class="p-4 font-semibold text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programs-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Dynamic JS Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. GALLERY SECTION -->
+            <div id="section-gallery" class="content-section hidden space-y-6">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-800">Atur Galeri Dokumentasi</h3>
+                        <p class="text-slate-500 text-sm mt-1">Kelola foto kegiatan yang tampil pada galeri website.</p>
+                    </div>
+                    <button onclick="openGalleryModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm">
+                        <i class="fas fa-plus"></i> Tambah Foto Galeri
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-admin-grid">
+                    <!-- Dynamic JS Grid -->
+                </div>
+            </div>
+
+            <!-- 5. POPUP EVENT SECTION -->
+            <div id="section-popup" class="content-section hidden space-y-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-slate-800">Pop-up Upcoming Event</h3>
+                    <p class="text-slate-500 text-sm mt-1">Atur pop-up promosi acara yang otomatis muncul saat pengunjung membuka website.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 max-w-3xl">
+                    <form id="popup-form" onsubmit="savePopup(event)" class="space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Tampilkan Pop-up Otomatis</h4>
+                                <p class="text-xs text-slate-500">Nonaktifkan jika tidak ada acara yang perlu dipromosikan.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="pop-active" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Judul Acara</label>
+                            <input type="text" id="pop-title" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Tanggal & Waktu</label>
+                                <input type="text" id="pop-date" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Lokasi</label>
+                                <input type="text" id="pop-location" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">URL Gambar Banner</label>
+                            <input type="url" id="pop-image" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-600" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Deskripsi Acara</label>
+                            <textarea id="pop-desc" rows="3" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none" required></textarea>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/20 transition-all">
+                                Simpan Pengaturan Pop-up
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL FORM PROGRAM -->
+    <div id="program-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden p-6 space-y-4">
+            <h3 class="text-xl font-bold text-slate-800" id="program-modal-title">Tambah Program</h3>
+            <form id="program-form" onsubmit="saveProgram(event)" class="space-y-4">
+                <input type="hidden" id="prog-index" value="-1">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Program</label>
+                    <input type="text" id="prog-title" class="w-full px-4 py-2 border border-slate-300 rounded-xl outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Deskripsi Singkat</label>
+                    <textarea id="prog-desc" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-xl outline-none resize-none" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Ikon FontAwesome (contoh: fas fa-campground)</label>
+                    <input type="text" id="prog-icon" class="w-full px-4 py-2 border border-slate-300 rounded-xl outline-none" required>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeProgramModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FORM GALLERY -->
+    <div id="gallery-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden p-6 space-y-4">
+            <h3 class="text-xl font-bold text-slate-800" id="gallery-modal-title">Tambah Foto Galeri</h3>
+            <form id="gallery-form" onsubmit="saveGalleryItem(event)" class="space-y-4">
+                <input type="hidden" id="gal-index" value="-1">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Judul / Keterangan Foto</label>
+                    <input type="text" id="gal-title" class="w-full px-4 py-2 border border-slate-300 rounded-xl outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL Gambar (Unsplash/Foto)</label>
+                    <input type="url" id="gal-img" class="w-full px-4 py-2 border border-slate-300 rounded-xl outline-none" required>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="gal-wide" class="w-4 h-4 rounded text-blue-600">
+                    <label for="gal-wide" class="text-sm text-slate-700 font-medium">Buat Ukuran Lebar (Grid 2 Kolom)</label>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeGalleryModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fas fa-check-circle text-emerald-400 text-lg"></i>
+        <span id="toast-msg" class="text-sm font-medium">Berhasil disimpan!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- SESSION AUTHENTICATION CHECK ---
+        async function checkSession() {
+            try {
+                const response = await fetch('api/check-session.php');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Session is valid, update admin info
+                    const adminUsername = data.data.username;
+                    const firstLetter = adminUsername.charAt(0).toUpperCase();
+                    
+                    document.getElementById('admin-avatar').textContent = firstLetter;
+                    document.getElementById('admin-username').textContent = adminUsername;
+                    document.getElementById('dropdown-username').textContent = adminUsername + ' (' + data.data.email + ')';
+                    
+                    // Start periodic session refresh
+                    setInterval(() => {
+                        fetch('api/check-session.php').catch(() => {
+                            // If session check fails, redirect to login
+                            window.location.href = 'login.php';
+                        });
+                    }, 5 * 60 * 1000); // Refresh every 5 minutes
+                } else {
+                    // Session expired or invalid
+                    window.location.href = 'login.php';
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+                window.location.href = 'login.php';
+            }
+        }
+
+        // Toggle dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdown-menu');
+            dropdown.classList.toggle('hidden');
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('profile-dropdown').contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                window.location.href = 'api/logout.php';
+            }
+        }
+
+        // Check session on page load
+        window.addEventListener('load', checkSession);
+
+        // --- DEFAULT DATA STRUCTURE ---
+        const defaultData = {
+            company: "Culture Bridge Indonesia",
+            tagline: "Satu Jembatan, Seribu Pengalaman",
+            whatsapp: "6281218681751",
+            programs: [
+                { title: "Amazing English Camp", desc: "Program perkemahan bahasa Inggris yang intensif dan menyenangkan. Dirancang khusus untuk meningkatkan keberanian dan kemampuan berbicara bahasa Inggris secara natural.", icon: "fas fa-campground" },
+                { title: "Global Culture Talk", desc: "Program pertukaran budaya secara daring (online) antara siswa SMA Indonesia dengan siswa SMA Jepang serta negara lainnya untuk memperluas wawasan global.", icon: "fas fa-comments" },
+                { title: "Leadership Training", desc: "Pelatihan kepemimpinan interaktif untuk membentuk karakter mandiri, berpikir kritis, komunikasi efektif, dan kemampuan bekerja dalam tim.", icon: "fas fa-user-ninja" },
+                { title: "Ice Breaker Program", desc: "Sesi pencair suasana yang kreatif dan dinamis. Sangat cocok untuk membuka acara, membangun keakraban grup, serta meningkatkan keterlibatan peserta.", icon: "fas fa-puzzle-piece" }
+            ],
+            gallery: [
+                { title: "Diskusi Interaktif", img: "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", wide: false },
+                { title: "Global Culture Talk (Online)", img: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", wide: true },
+                { title: "Ice Breaker & Teamwork", img: "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", wide: false },
+                { title: "Leadership Training", img: "https://images.unsplash.com/photo-1526976663112-00a525206263?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80", wide: true },
+                { title: "English Camp", img: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", wide: false },
+                { title: "Peserta Program CBI", img: "https://images.unsplash.com/photo-1523580494112-071d16940a04?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", wide: false }
+            ],
+            popup: {
+                active: true,
+                title: "Youth Global Leadership Summit 2026",
+                date: "15 - 17 November 2026",
+                location: "Tokyo, Jepang & Daring",
+                image: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                desc: "Bergabunglah dengan ratusan pemuda dari Indonesia dan Jepang dalam acara puncak pertukaran budaya dan kepemimpinan global tahun ini. Kuota terbatas!"
+            }
+        };
+
+        // --- LOAD / SAVE LOCALSTORAGE ---
+        function getCbiData() {
+            const data = localStorage.getItem('cbi_website_data');
+            return data ? JSON.parse(data) : defaultData;
+        }
+
+        function saveCbiData(data) {
+            localStorage.setItem('cbi_website_data', JSON.stringify(data));
+            showToast("Perubahan berhasil disimpan!");
+            updateDashboardCounts();
+        }
+
+        function resetDataToDefault() {
+            if(confirm("Yakin ingin mereset seluruh data kembali ke setelan awal?")) {
+                localStorage.setItem('cbi_website_data', JSON.stringify(defaultData));
+                location.reload();
+            }
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+            if(el) el.classList.add('nav-active');
+
+            const titles = {
+                'dashboard': 'Dasbor Panel Admin',
+                'general': 'Identitas & Tagline Website',
+                'programs': 'Kelola Program Layanan',
+                'gallery': 'Kelola Galeri Foto',
+                'popup': 'Pengaturan Pop-up Event'
+            };
+            document.getElementById('current-page-title').innerText = titles[tabId] || 'Admin Panel';
+            
+            if(tabId === 'programs') renderProgramsTable();
+            if(tabId === 'gallery') renderGalleryAdmin();
+            if(tabId === 'popup') loadPopupForm();
+            if(tabId === 'general') loadGeneralForm();
+        }
+
+        function updateDashboardCounts() {
+            const data = getCbiData();
+            document.getElementById('count-programs').innerText = data.programs.length;
+            document.getElementById('count-gallery').innerText = data.gallery.length;
+            const badge = document.getElementById('status-popup-badge');
+            if(data.popup && data.popup.active) {
+                badge.innerText = "Aktif";
+                badge.className = "text-xl font-bold text-emerald-600 mt-1";
+            } else {
+                badge.innerText = "Nonaktif";
+                badge.className = "text-xl font-bold text-rose-500 mt-1";
+            }
+        }
+
+        // --- GENERAL FORM ---
+        function loadGeneralForm() {
+            const data = getCbiData();
+            document.getElementById('gen-company').value = data.company;
+            document.getElementById('gen-tagline').value = data.tagline;
+            document.getElementById('gen-wa').value = data.whatsapp;
+        }
+
+        function saveGeneral(e) {
+            e.preventDefault();
+            let data = getCbiData();
+            data.company = document.getElementById('gen-company').value;
+            data.tagline = document.getElementById('gen-tagline').value;
+            data.whatsapp = document.getElementById('gen-wa').value;
+            saveCbiData(data);
+        }
+
+        // --- PROGRAMS MANAGEMENT ---
+        function renderProgramsTable() {
+            const data = getCbiData();
+            const tbody = document.getElementById('programs-table-body');
+            tbody.innerHTML = '';
+            data.programs.forEach((p, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-4"><div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><i class="${p.icon}"></i></div></td>
+                        <td class="p-4 font-bold text-slate-800">${p.title}</td>
+                        <td class="p-4 text-slate-600 max-w-xs truncate">${p.desc}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editProgram(${idx})" class="text-blue-500 hover:text-blue-700 p-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProgram(${idx})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openProgramModal(idx = -1) {
+            document.getElementById('prog-index').value = idx;
+            if(idx > -1) {
+                const data = getCbiData();
+                const p = data.programs[idx];
+                document.getElementById('program-modal-title').innerText = "Edit Program";
+                document.getElementById('prog-title').value = p.title;
+                document.getElementById('prog-desc').value = p.desc;
+                document.getElementById('prog-icon').value = p.icon;
+            } else {
+                document.getElementById('program-modal-title').innerText = "Tambah Program Baru";
+                document.getElementById('prog-title').value = '';
+                document.getElementById('prog-desc').value = '';
+                document.getElementById('prog-icon').value = 'fas fa-graduation-cap';
+            }
+            document.getElementById('program-modal').classList.remove('hidden');
+        }
+
+        function closeProgramModal() {
+            document.getElementById('program-modal').classList.add('hidden');
+        }
+
+        function saveProgram(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('prog-index').value);
+            let data = getCbiData();
+            const newProg = {
+                title: document.getElementById('prog-title').value,
+                desc: document.getElementById('prog-desc').value,
+                icon: document.getElementById('prog-icon').value
+            };
+            if(idx > -1) {
+                data.programs[idx] = newProg;
+            } else {
+                data.programs.push(newProg);
+            }
+            saveCbiData(data);
+            closeProgramModal();
+            renderProgramsTable();
+        }
+
+        function editProgram(idx) {
+            openProgramModal(idx);
+        }
+
+        function deleteProgram(idx) {
+            if(confirm("Hapus program ini dari daftar?")) {
+                let data = getCbiData();
+                data.programs.splice(idx, 1);
+                saveCbiData(data);
+                renderProgramsTable();
+            }
+        }
+
+        // --- GALLERY MANAGEMENT ---
+        function renderGalleryAdmin() {
+            const data = getCbiData();
+            const grid = document.getElementById('gallery-admin-grid');
+            grid.innerHTML = '';
+            data.gallery.forEach((g, idx) => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+                        <div class="h-40 rounded-xl overflow-hidden relative">
+                            <img src="${g.img}" class="w-full h-full object-cover">
+                            ${g.wide ? '<span class="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Lebar (2 Kolom)</span>' : ''}
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm truncate">${g.title}</h4>
+                        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button onclick="editGallery(${idx})" class="text-blue-500 hover:text-blue-700 text-xs font-semibold px-2 py-1"><i class="fas fa-edit mr-1"></i> Edit</button>
+                            <button onclick="deleteGallery(${idx})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold px-2 py-1"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openGalleryModal(idx = -1) {
+            document.getElementById('gal-index').value = idx;
+            if(idx > -1) {
+                const data = getCbiData();
+                const g = data.gallery[idx];
+                document.getElementById('gallery-modal-title').innerText = "Edit Foto Galeri";
+                document.getElementById('gal-title').value = g.title;
+                document.getElementById('gal-img').value = g.img;
+                document.getElementById('gal-wide').checked = g.wide;
+            } else {
+                document.getElementById('gallery-modal-title').innerText = "Tambah Foto Galeri";
+                document.getElementById('gal-title').value = '';
+                document.getElementById('gal-img').value = '';
+                document.getElementById('gal-wide').checked = false;
+            }
+            document.getElementById('gallery-modal').classList.remove('hidden');
+        }
+
+        function closeGalleryModal() {
+            document.getElementById('gallery-modal').classList.add('hidden');
+        }
+
+        function saveGalleryItem(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('gal-index').value);
+            let data = getCbiData();
+            const newItem = {
+                title: document.getElementById('gal-title').value,
+                img: document.getElementById('gal-img').value,
+                wide: document.getElementById('gal-wide').checked
+            };
+            if(idx > -1) {
+                data.gallery[idx] = newItem;
+            } else {
+                data.gallery.push(newItem);
+            }
+            saveCbiData(data);
+            closeGalleryModal();
+            renderGalleryAdmin();
+        }
+
+        function editGallery(idx) {
+            openGalleryModal(idx);
+        }
+
+        function deleteGallery(idx) {
+            if(confirm("Hapus foto dari galeri?")) {
+                let data = getCbiData();
+                data.gallery.splice(idx, 1);
+                saveCbiData(data);
+                renderGalleryAdmin();
+            }
+        }
+
+        // --- POPUP EVENT MANAGEMENT ---
+        function loadPopupForm() {
+            const data = getCbiData();
+            const p = data.popup;
+            document.getElementById('pop-active').checked = p.active;
+            document.getElementById('pop-title').value = p.title;
+            document.getElementById('pop-date').value = p.date;
+            document.getElementById('pop-location').value = p.location;
+            document.getElementById('pop-image').value = p.image;
+            document.getElementById('pop-desc').value = p.desc;
+        }
+
+        function savePopup(e) {
+            e.preventDefault();
+            let data = getCbiData();
+            data.popup = {
+                active: document.getElementById('pop-active').checked,
+                title: document.getElementById('pop-title').value,
+                date: document.getElementById('pop-date').value,
+                location: document.getElementById('pop-location').value,
+                image: document.getElementById('pop-image').value,
+                desc: document.getElementById('pop-desc').value
+            };
+            saveCbiData(data);
+        }
+
+        // Initialize dashboard counters on load
+        window.onload = function() {
+            updateDashboardCounts();
+        };
+
+        // Sidebar responsive menu triggers
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('open-sidebar').addEventListener('click', () => sidebar.classList.remove('hidden'));
+        document.getElementById('close-sidebar').addEventListener('click', () => sidebar.classList.add('hidden'));
+    </script>
+</body>
+</html>

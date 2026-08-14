@@ -1,0 +1,26 @@
+# Sensitive Configuration Files
+config.php
+/logs/
+error.log
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# PHP
+*.php~
+composer.lock
+
+# Temporary Files
+*.tmp
+*.temp
+*~
