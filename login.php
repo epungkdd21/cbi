@@ -24,6 +24,23 @@ $csrf_token = generateCsrfToken();
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .admin-glow {
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen flex items-center justify-center p-4">
@@ -31,14 +48,19 @@ $csrf_token = generateCsrfToken();
     <div class="w-full max-w-md">
         <!-- Logo & Header -->
         <div class="text-center mb-8">
-            <div class="inline-block mb-4">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-900 to-indigo-600 flex items-center justify-center text-white font-black text-3xl shadow-lg">
+            <div class="inline-block mb-4 cursor-pointer group" id="logo-trigger" title="Klik logo untuk akses khusus">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-900 to-indigo-600 flex items-center justify-center text-white font-black text-3xl shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all">
                     CBI
                 </div>
             </div>
             <h1 class="text-3xl font-black text-blue-950 mb-2">Culture Bridge</h1>
             <p class="text-amber-500 font-bold tracking-wider uppercase text-sm mb-2">Indonesia</p>
             <p class="font-['Caveat'] text-slate-600 text-lg font-semibold">Satu Jembatan, Seribu Pengalaman</p>
+            
+            <!-- Hidden Admin Access Indicator -->
+            <div id="admin-indicator" class="hidden mt-3 text-xs text-amber-600 font-semibold animate-pulse">
+                <i class="fas fa-lock-open"></i> Admin Access Activated
+            </div>
         </div>
 
         <!-- Login Card -->
@@ -115,6 +137,28 @@ $csrf_token = generateCsrfToken();
             </div>
         </div>
 
+        <!-- Hidden Admin Portal Access Button -->
+        <div id="admin-portal-section" class="hidden mt-6 bg-gradient-to-r from-amber-900 to-amber-800 rounded-3xl shadow-2xl border border-amber-700 p-6 space-y-4">
+            <div class="text-center">
+                <i class="fas fa-crown text-amber-300 text-2xl mb-2"></i>
+                <h3 class="text-lg font-bold text-white">Akses Admin Eksklusif</h3>
+                <p class="text-xs text-amber-100 mt-1">Portal manajemen konten tersedia</p>
+            </div>
+            
+            <button 
+                onclick="showAdminPortal()" 
+                class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-amber-500/30 transition-all flex items-center justify-center gap-2"
+                id="admin-access-btn"
+            >
+                <i class="fas fa-key"></i>
+                <span>Buka Portal Admin</span>
+            </button>
+            
+            <p class="text-xs text-amber-200 text-center">
+                <i class="fas fa-shield-alt"></i> Sistem terenkripsi & aman
+            </p>
+        </div>
+
         <!-- Forgot Password Modal -->
         <div id="forgot-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 space-y-6">
@@ -175,6 +219,86 @@ $csrf_token = generateCsrfToken();
     </div>
 
     <script>
+        // Hidden Admin Portal Activation System
+        let logoClickCount = 0;
+        let logoClickTimer = null;
+        const LOGO_CLICK_THRESHOLD = 3;
+        const LOGO_CLICK_RESET_TIME = 2000; // 2 seconds
+
+        document.getElementById('logo-trigger').addEventListener('click', function() {
+            logoClickCount++;
+            
+            // Clear existing timer
+            clearTimeout(logoClickTimer);
+            
+            // Reset counter after 2 seconds of inactivity
+            logoClickTimer = setTimeout(() => {
+                logoClickCount = 0;
+                document.getElementById('admin-indicator').classList.add('hidden');
+            }, LOGO_CLICK_RESET_TIME);
+
+            // Show admin portal after 3 clicks
+            if (logoClickCount >= LOGO_CLICK_THRESHOLD) {
+                activateAdminPortal();
+            }
+        });
+
+        // Alternative activation: Keyboard shortcut (Ctrl+Shift+X)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.code === 'KeyX') {
+                e.preventDefault();
+                activateAdminPortal();
+            }
+        });
+
+        function activateAdminPortal() {
+            const adminSection = document.getElementById('admin-portal-section');
+            const adminIndicator = document.getElementById('admin-indicator');
+            
+            if (adminSection.classList.contains('hidden')) {
+                adminSection.classList.remove('hidden');
+                adminIndicator.classList.remove('hidden');
+                logoClickCount = 0;
+                
+                // Play subtle notification
+                playNotification();
+            }
+        }
+
+        function showAdminPortal() {
+            const accessBtn = document.getElementById('admin-access-btn');
+            accessBtn.disabled = true;
+            accessBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Membuka Portal...</span>';
+            
+            // Verify admin session or show additional authentication
+            setTimeout(() => {
+                // Check if there's an active admin session
+                window.location.href = '/admin';
+            }, 800);
+        }
+
+        function playNotification() {
+            // Optional: Create a subtle visual pulse effect
+            const logo = document.getElementById('logo-trigger').querySelector('div');
+            logo.style.animation = 'pulse 0.5s ease-out';
+            setTimeout(() => {
+                logo.style.animation = '';
+            }, 500);
+        }
+
+        // Hide admin portal when clicking outside
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const adminSection = document.getElementById('admin-portal-section');
+                const adminIndicator = document.getElementById('admin-indicator');
+                if (!adminSection.classList.contains('hidden')) {
+                    adminSection.classList.add('hidden');
+                    adminIndicator.classList.add('hidden');
+                    logoClickCount = 0;
+                }
+            }
+        });
+
         // Handle login form submission
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();

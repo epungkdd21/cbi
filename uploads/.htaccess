@@ -1,0 +1,30 @@
+// Secure uploads directory
+// Allow only image files to be accessed
+<FilesMatch "\.php$">
+    Deny from all
+</FilesMatch>
+
+// Allow only image file types
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+    Allow from all
+    AddType image/jpeg .jpg
+    AddType image/jpeg .jpeg
+    AddType image/png .png
+    AddType image/gif .gif
+    AddType image/webp .webp
+    AddType image/svg+xml .svg
+    AddType image/x-icon .ico
+</FilesMatch>
+
+// Prevent execution of any scripts
+<FilesMatch "\.(?:php[0-9]?|phtml|php3|php4|php5|php6|php7|php8|phps|ctp|shtml|phar|pht|phtml|php|php3|php4|php5|php6|php7|php8)$">
+    Deny from all
+</FilesMatch>
+
+// Disable directory listing
+Options -Indexes
+
+// Cache images for 1 month
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+    Header set Cache-Control "public, max-age=2592000, immutable"
+</FilesMatch>

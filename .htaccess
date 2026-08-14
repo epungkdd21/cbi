@@ -17,21 +17,40 @@
     DirectoryIndex index.html
 
     # Protect sensitive files
-    <FilesMatch "config\.php|\.env|schema\.sql">
+    <FilesMatch "config\.php|\.env|schema\.sql|security\.php|\.json$">
         Order allow,deny
         Deny from all
     </FilesMatch>
+
+    # Prevent access to logs directory
+    RewriteCond %{REQUEST_URI} ^/logs/ [NC]
+    RewriteRule ^ - [F,L]
 
     # Cache busting for static assets
     <FilesMatch "\.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$">
         Header set Cache-Control "max-age=31536000, public"
     </FilesMatch>
 
+    # Disable HTTP methods for security
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|DELETE)$ [NC]
+    RewriteRule ^ - [F,L]
+
 </IfModule>
 
 # Disable directory listing for security
 <IfModule mod_autoindex.c>
     Options -Indexes
+</IfModule>
+
+# Disable unused HTTP methods
+<IfModule mod_allowmethods.c>
+    <Directory />
+        AllowMethods GET POST HEAD OPTIONS
+    </Directory>
+    
+    <Directory /api>
+        AllowMethods GET POST PUT DELETE HEAD OPTIONS
+    </Directory>
 </IfModule>
 
 # Security Headers
@@ -48,8 +67,20 @@
     # Referrer Policy
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     
-    # Feature Policy
+    # Feature Policy / Permissions Policy
     Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    
+    # Content Security Policy (flexible for development)
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self'; form-action 'self'; frame-ancestors 'self';"
+    
+    # Remove server version information
+    Header unset Server
+    Header unset X-Powered-By
+    Header unset X-AspNet-Version
+    Header unset X-Runtime
+    
+    # Set secure cookie flags
+    Header edit Set-Cookie ^(.*)$ "$1; Secure; HttpOnly; SameSite=Lax"
 </IfModule>
 
 # Deny access to hidden files and directories
@@ -62,3 +93,50 @@
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# Protect specific directories
+<Directory ~ "^\.|^(uploads/thumbnails|logs|config)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Directory>
+
+# Prevent code execution in upload directories
+<Directory ~ "^/uploads">
+    <IfModule mod_php.c>
+        php_flag engine off
+    </IfModule>
+    AddType text/plain .php .phtml .php3 .php4 .php5 .php6 .php7 .php8 .phps .phar .pht
+    AddHandler cgi-script .php .phtml .php3 .php4 .php5 .php6 .php7 .php8
+</Directory>
+
+# Prevent SQL injection attempts
+<IfModule mod_rewrite.c>
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} UNION.*SELECT [NC,OR]
+    RewriteCond %{QUERY_STRING} union.*all.*select [NC,OR]
+    RewriteCond %{QUERY_STRING} concat[^a-z] [NC]
+    RewriteRule ^ - [F,L]
+</IfModule>
+
+# Set proper MIME types
+<IfModule mod_mime.c>
+    AddType application/javascript js
+    AddType application/json json
+    AddEncoding gzip svgz
+    AddType image/svg+xml svg svgz
+    AddHandler gzip-handler svgz
+</IfModule>
+
+# Performance and Security - Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Disable server signature
+ServerTokens Prod
+ServerSignature Off
