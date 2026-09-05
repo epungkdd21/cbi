@@ -21,12 +21,20 @@ function findValue(value: unknown, keys: string[]): string | undefined {
   for (const key of keys) {
     const candidate = record[key]
     if (typeof candidate === 'string' && candidate.trim()) return candidate
+    if (typeof candidate === 'number') return String(candidate)
   }
   for (const nested of Object.values(record)) {
     const found = findValue(nested, keys)
     if (found) return found
   }
   return undefined
+}
+
+function findNumber(value: unknown, keys: string[]): number | undefined {
+  const found = findValue(value, keys)
+  if (!found) return undefined
+  const parsed = Number(found.replace(/[^0-9.-]/g, ''))
+  return Number.isFinite(parsed) ? parsed : undefined
 }
 
 export async function POST(request: Request) {
@@ -55,8 +63,10 @@ export async function POST(request: Request) {
       qris,
       qrImage,
       paymentUrl: findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl']),
-      transactionId: findValue(result, ['transaction_id', 'transactionId', 'reference', 'id']),
-      expiresAt: findValue(result, ['expires_at', 'expiresAt']),
+      transactionId: findValue(result, ['transaction_id', 'transactionId', 'reference', 'order_id', 'orderId', 'id']),
+      amount: findNumber(result, ['amount', 'total_amount', 'totalAmount', 'base_amount', 'baseAmount']),
+      expiresAt: findValue(result, ['expires_at', 'expiresAt', 'expired_at', 'expiredAt', 'expiration']),
+      status: findValue(result, ['status', 'payment_status', 'paymentStatus']) || 'pending',
       providerResponse: data,
     })
   } catch {

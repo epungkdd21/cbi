@@ -30,6 +30,10 @@ export default function Page() {
   const [message, setMessage] = useState('')
   const [qrImage, setQrImage] = useState<string | null>(null)
   const [transactionId, setTransactionId] = useState<string | null>(null)
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null)
+  const [paymentAmount, setPaymentAmount] = useState<number>(ticketPrice + serviceFee)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
+  const [paymentStatus, setPaymentStatus] = useState('pending')
 
   const total = useMemo(() => selectedSeats.length * ticketPrice + serviceFee, [selectedSeats.length])
 
@@ -72,10 +76,6 @@ export default function Page() {
       })
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Pembayaran belum tersedia.')
-      if (result.paymentUrl) {
-        window.location.href = result.paymentUrl
-        return
-      }
       const qrisPayload = typeof result.qris === 'string' ? result.qris : ''
       const providerImage = typeof result.qrImage === 'string' ? result.qrImage : ''
       const imageSource = providerImage || qrisPayload
@@ -89,6 +89,10 @@ export default function Page() {
         : null
       setQrImage(generatedQrImage)
       setTransactionId(result.transactionId || null)
+      setPaymentUrl(result.paymentUrl || null)
+      setPaymentAmount(typeof result.amount === 'number' ? result.amount : total)
+      setExpiresAt(result.expiresAt || null)
+      setPaymentStatus(result.status || 'pending')
       setStep(3)
       setMessage(generatedQrImage ? 'Scan QRIS berikut untuk menyelesaikan pembayaran.' : 'Pesanan berhasil dibuat, tetapi data QRIS belum dikirim oleh PayKita.')
     } catch (error) {
@@ -139,7 +143,7 @@ export default function Page() {
 
           {step === 2 && <form onSubmit={submitPayment} aria-labelledby="buyer-heading"><div className="mb-7 flex items-center justify-between"><div><p className="eyebrow">02 / Data pemesan</p><h2 id="buyer-heading" className="mt-1 text-2xl font-semibold">Ke mana tiket dikirim?</h2></div><button type="button" className="back-button" onClick={() => setStep(1)}>← Ubah kursi</button></div><div className="form-grid"><label className="field-label">Nama lengkap<input required value={buyer.name} onChange={(event) => setBuyer({ ...buyer, name: event.target.value })} className="input-field" placeholder="Nama sesuai identitas" /></label><label className="field-label">Email<input required type="email" value={buyer.email} onChange={(event) => setBuyer({ ...buyer, email: event.target.value })} className="input-field" placeholder="nama@email.com" /></label><label className="field-label">Nomor WhatsApp<input required type="tel" value={buyer.phone} onChange={(event) => setBuyer({ ...buyer, phone: event.target.value })} className="input-field" placeholder="08xxxxxxxxxx" /></label></div><div className="mt-9 border-t border-border/70 pt-7"><p className="eyebrow">03 / Pembayaran</p><h2 className="mt-1 text-2xl font-semibold">Pilih metode pembayaran</h2><div className="mt-5 grid max-w-sm gap-3"><div className="payment-option payment-selected" aria-label="Metode pembayaran QRIS aktif"><span className="payment-icon">▦</span><span>QRIS</span><span className="payment-check">✓</span></div></div><p className="mt-3 text-xs text-muted-foreground">Bayar cepat dengan memindai kode QRIS melalui aplikasi pembayaran pilihanmu.</p></div><div className="mt-8 flex flex-col justify-between gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center"><button type="button" className="back-button" onClick={() => setStep(1)}>← Kembali</button><button type="submit" className="primary-button">Bayar dengan PayKita <span>→</span></button></div></form>}
 
-          {step === 3 && <section className="success-panel" aria-labelledby="success-heading"><div className="success-icon">✓</div><p className="eyebrow">Menunggu pembayaran</p><h2 id="success-heading" className="mt-2 text-3xl font-semibold">Scan QRIS untuk membayar.</h2><p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">Buka aplikasi pembayaran pilihanmu, scan kode QRIS di bawah, lalu tunggu konfirmasi pembayaran.</p>{qrImage ? <div className="mt-6 flex max-w-sm flex-col items-center gap-4 rounded-xl border border-border bg-card p-5"><img src={qrImage} alt="QRIS pembayaran tiket Dwipantara" className="size-64 rounded-lg object-contain" /><p className="text-center text-xs text-muted-foreground">Jangan tutup halaman ini sampai pembayaran terverifikasi.</p></div> : <div className="mt-6 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">PayKita belum mengirim gambar QRIS. Periksa respons API atau gunakan URL pembayaran yang diberikan.</div>}{transactionId && <p className="mt-4 font-mono text-xs text-muted-foreground">ID transaksi: {transactionId}</p>}<button type="button" className="back-button mt-7" onClick={() => { setStep(2); setQrImage(null); setTransactionId(null) }}>← Kembali</button></section>}
+          {step === 3 && <section className="success-panel" aria-labelledby="success-heading"><div className="success-icon">✓</div><p className="eyebrow">Pembayaran PayKita</p><h2 id="success-heading" className="mt-2 text-3xl font-semibold">Scan QRIS untuk membayar.</h2><p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">Gunakan aplikasi pembayaran pilihanmu untuk memindai kode berikut. Setelah pembayaran selesai, simpan halaman ini sebagai bukti instruksi pembayaran.</p><div className="mt-6 grid max-w-xl gap-4 sm:grid-cols-[auto_1fr] sm:items-start"><div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-5">{qrImage ? <img src={qrImage} alt="QRIS pembayaran tiket Dwipantara" className="size-64 rounded-lg object-contain" /> : <div className="flex size-64 items-center justify-center rounded-lg bg-muted px-6 text-center text-sm text-muted-foreground">QRIS belum dikirim PayKita.</div>}<p className="text-center text-xs text-muted-foreground">Status: <strong className="text-foreground">{paymentStatus}</strong></p></div><dl className="grid gap-3 rounded-xl border border-border bg-card p-5 text-sm"><div className="flex items-start justify-between gap-4"><dt className="text-muted-foreground">Total pembayaran</dt><dd className="font-semibold">{formatRupiah(paymentAmount)}</dd></div>{transactionId && <div className="flex items-start justify-between gap-4"><dt className="text-muted-foreground">ID transaksi</dt><dd className="max-w-[12rem] break-all text-right font-mono text-xs">{transactionId}</dd></div>}{expiresAt && <div className="flex items-start justify-between gap-4"><dt className="text-muted-foreground">Berlaku sampai</dt><dd className="text-right">{expiresAt}</dd></div>}<div className="flex items-start justify-between gap-4"><dt className="text-muted-foreground">Metode</dt><dd className="font-semibold">QRIS</dd></div></dl></div>{paymentUrl && !qrImage && <a href={paymentUrl} target="_blank" rel="noreferrer" className="secondary-button mt-5 inline-flex">Buka halaman pembayaran PayKita <span>↗</span></a>}<button type="button" className="back-button mt-7" onClick={() => { setStep(2); setQrImage(null); setTransactionId(null); setPaymentUrl(null); setExpiresAt(null) }}>← Kembali</button></section>}
           {message && <p role="status" className="mt-5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">{message}</p>}
         </div>
 
