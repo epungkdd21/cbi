@@ -24,8 +24,8 @@ export default function Page() {
   const [selectedCinema, setSelectedCinema] = useState(cinemas[0])
   const [selectedTime, setSelectedTime] = useState(showtimes[2])
   const [selectedSeats, setSelectedSeats] = useState<string[]>(['D4'])
-  const [step, setStep] = useState(1)
-  const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' })
+  const [step, setStep] = useState(0)
+  const [buyer, setBuyer] = useState({ name: 'Saiful Bahri', email: 'abah@jagatarsy.sch.id', phone: '087785411066' })
   const payment = 'QRIS'
   const [message, setMessage] = useState('')
   const [qrImage, setQrImage] = useState<string | null>(null)
@@ -105,7 +105,7 @@ export default function Page() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="ticket-page min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 lg:px-8">
           <div className="flex items-center gap-3">
@@ -130,9 +130,11 @@ export default function Page() {
             <div className="hidden text-right sm:block"><p className="font-mono text-3xl font-semibold text-primary">01</p><p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">03 langkah</p></div>
           </div>
 
-          <nav aria-label="Progres pemesanan" className="mb-8 flex items-center gap-3 border-y border-border/70 py-4">
+          {step > 0 && <nav aria-label="Progres pemesanan" className="mb-8 flex items-center gap-3 border-y border-border/70 py-4">
             {['Pilih tiket', 'Data pemesan', 'Pembayaran'].map((label, index) => <div key={label} className={`flex items-center gap-2 text-xs font-semibold ${step === index + 1 ? 'text-primary' : step > index + 1 ? 'text-foreground' : 'text-muted-foreground'}`}><span className={`step-number ${step > index + 1 ? 'step-done' : ''}`}>{step > index + 1 ? '✓' : index + 1}</span>{label}{index < 2 && <span className="ml-1 text-border">—</span>}</div>)}
-          </nav>
+          </nav>}
+
+          {step === 0 && <section className="event-dashboard" aria-labelledby="event-heading"><div className="event-hero"><div><p className="eyebrow">Dwipantara / Event resmi</p><h2 id="event-heading" className="mt-3 max-w-2xl text-balance font-serif text-5xl leading-none sm:text-7xl">Sebuah perjalanan yang tinggal kamu mulai.</h2><p className="mt-5 max-w-xl text-sm leading-6 text-muted-foreground">Hadiri pemutaran spesial Dwipantara, ruang temu untuk cerita, musik, dan orang-orang yang percaya bahwa perjalanan selalu punya makna.</p><button type="button" onClick={() => setStep(1)} className="primary-button mt-7">Beli tiket sekarang <span>→</span></button></div><div className="event-badge"><span>LIVE</span><strong>20—23</strong><small>JUNI 2025<br />JAKARTA</small></div></div><div className="event-details"><div><span>Acara</span><strong>Pemutaran film &amp; temu komunitas</strong></div><div><span>Lokasi</span><strong>CGV Grand Indonesia</strong></div><div><span>Durasi</span><strong>2 jam 18 menit</strong></div></div><div className="event-columns"><div><p className="eyebrow">Tentang acara</p><h3 className="mt-2 text-2xl font-semibold">Bukan sekadar menonton.</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Dwipantara mengajakmu melampaui batas waktu melalui pengalaman sinematik yang intim. Pilih jadwal, kursi, dan dapatkan tiket digital langsung setelah pembayaran selesai.</p></div><div className="event-list"><div><span>01</span><p><strong>Film screening</strong><br />Nikmati pemutaran film dalam studio pilihan.</p></div><div><span>02</span><p><strong>Ruang temu</strong><br />Berbagi cerita bersama komunitas Dwipantara.</p></div></div></div></section>}
 
           {step === 1 && <section aria-labelledby="schedule-heading">
             <div className="mb-6 flex items-center justify-between"><div><p className="eyebrow">01 / Jadwal</p><h2 id="schedule-heading" className="mt-1 text-2xl font-semibold">Kapan kamu ingin menonton?</h2></div><span className="badge">Jakarta</span></div>
