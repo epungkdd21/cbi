@@ -93,11 +93,11 @@ export default function Page() {
       setPaymentAmount(typeof result.amount === 'number' ? result.amount : total)
       setExpiresAt(result.expiresAt || null)
       setPaymentStatus(result.status || 'pending')
-      setStep(3)
-      if (!generatedQrImage && result.paymentUrl) {
+      if (result.paymentUrl) {
         window.location.assign(result.paymentUrl)
         return
       }
+      setStep(3)
       setMessage(generatedQrImage ? 'Scan QRIS berikut untuk menyelesaikan pembayaran.' : 'Pesanan berhasil dibuat, tetapi data QRIS dan URL checkout belum dikirim oleh PayKita.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Pembayaran gagal dibuat. Coba lagi.')
