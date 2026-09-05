@@ -15,6 +15,20 @@ function readable(value: unknown): string | undefined {
   return value == null ? undefined : String(value)
 }
 
+function findValue(value: unknown, keys: string[]): string | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const record = value as Record<string, unknown>
+  for (const key of keys) {
+    const candidate = record[key]
+    if (typeof candidate === 'string' && candidate.trim()) return candidate
+  }
+  for (const nested of Object.values(record)) {
+    const found = findValue(nested, keys)
+    if (found) return found
+  }
+  return undefined
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.PAYKITA_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'PayKita belum dikonfigurasi di server.' }, { status: 503 })
@@ -35,12 +49,15 @@ export async function POST(request: Request) {
     }
 
     const data = result?.data || result?.payment || result
+    const qrImage = findValue(result, ['qr_image', 'qrImage', 'qr_code_image', 'qrCodeImage', 'qr_url', 'qrUrl', 'image_url', 'imageUrl'])
+    const qris = findValue(result, ['qris', 'qr_string', 'qrString', 'qr_content', 'qrContent', 'qr_code', 'qrCode'])
     return NextResponse.json({
-      qris: data?.qris,
-      qrImage: data?.qr_code || data?.qrCode || data?.qr_image || data?.qrImage || data?.qr_url || data?.qrUrl,
-      paymentUrl: data?.payment_url || data?.paymentUrl || data?.redirect_url || data?.redirectUrl,
-      transactionId: data?.transaction_id || data?.transactionId || data?.id,
-      expiresAt: data?.expires_at,
+      qris,
+      qrImage,
+      paymentUrl: findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl']),
+      transactionId: findValue(result, ['transaction_id', 'transactionId', 'reference', 'id']),
+      expiresAt: findValue(result, ['expires_at', 'expiresAt']),
+      providerResponse: data,
     })
   } catch {
     return NextResponse.json({ error: 'Tidak dapat terhubung ke PayKita. Coba lagi.' }, { status: 502 })

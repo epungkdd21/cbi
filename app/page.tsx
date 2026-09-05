@@ -76,11 +76,16 @@ export default function Page() {
         window.location.href = result.paymentUrl
         return
       }
-      const qrisPayload = result.qris || result.qrImage
-      const generatedQrImage = qrisPayload
-        ? qrisPayload.startsWith('data:image/')
-          ? qrisPayload
-          : await QRCode.toDataURL(qrisPayload, { width: 640, margin: 2, errorCorrectionLevel: 'M' })
+      const qrisPayload = typeof result.qris === 'string' ? result.qris : ''
+      const providerImage = typeof result.qrImage === 'string' ? result.qrImage : ''
+      const imageSource = providerImage || qrisPayload
+      const isImageSource = imageSource.startsWith('data:image/') || imageSource.startsWith('http://') || imageSource.startsWith('https://')
+      const generatedQrImage = imageSource
+        ? isImageSource
+          ? imageSource
+          : providerImage
+            ? `data:image/png;base64,${providerImage}`
+            : await QRCode.toDataURL(qrisPayload, { width: 640, margin: 2, errorCorrectionLevel: 'M' })
         : null
       setQrImage(generatedQrImage)
       setTransactionId(result.transactionId || null)
