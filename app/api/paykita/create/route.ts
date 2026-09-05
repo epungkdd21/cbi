@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const data = result?.data || result?.payment || result
     const qrImage = findValue(result, ['qr_image', 'qrImage', 'qr_code_image', 'qrCodeImage', 'qr_url', 'qrUrl', 'image_url', 'imageUrl'])
     const qris = findValue(result, ['qris', 'qr_string', 'qrString', 'qr_content', 'qrContent', 'qr_code', 'qrCode'])
-    const orderId = findValue(result, ['order_id', 'orderId', 'transaction_id', 'transactionId', 'reference', 'id'])
+    const orderId = findValue(result, ['order_id', 'orderId', 'id'])
     const providerPaymentUrl = findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl'])
     const checkoutUrl = providerPaymentUrl || (orderId ? `${checkoutBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(orderId)}` : undefined)
     return NextResponse.json({
