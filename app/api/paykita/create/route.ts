@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const paymentEndpoint = process.env.PAYKITA_API_URL || 'https://pay.digikita.id/api/orders'
+const checkoutBaseUrl = process.env.PAYKITA_CHECKOUT_URL || 'https://pay.digikita.id/checkout'
 
 function readable(value: unknown): string | undefined {
   if (typeof value === 'string') return value
@@ -59,11 +60,15 @@ export async function POST(request: Request) {
     const data = result?.data || result?.payment || result
     const qrImage = findValue(result, ['qr_image', 'qrImage', 'qr_code_image', 'qrCodeImage', 'qr_url', 'qrUrl', 'image_url', 'imageUrl'])
     const qris = findValue(result, ['qris', 'qr_string', 'qrString', 'qr_content', 'qrContent', 'qr_code', 'qrCode'])
+    const orderId = findValue(result, ['order_id', 'orderId', 'transaction_id', 'transactionId', 'reference', 'id'])
+    const providerPaymentUrl = findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl'])
+    const checkoutUrl = providerPaymentUrl || (orderId ? `${checkoutBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(orderId)}` : undefined)
     return NextResponse.json({
       qris,
       qrImage,
-      paymentUrl: findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl']),
-      transactionId: findValue(result, ['transaction_id', 'transactionId', 'reference', 'order_id', 'orderId', 'id']),
+      paymentUrl: checkoutUrl,
+      orderId,
+      transactionId: orderId,
       amount: findNumber(result, ['amount', 'total_amount', 'totalAmount', 'base_amount', 'baseAmount']),
       expiresAt: findValue(result, ['expires_at', 'expiresAt', 'expired_at', 'expiredAt', 'expiration']),
       status: findValue(result, ['status', 'payment_status', 'paymentStatus']) || 'pending',
