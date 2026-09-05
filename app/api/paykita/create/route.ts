@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
+import { query } from '@/lib/db'
 
 const paymentEndpoint = process.env.PAYKITA_API_URL || 'https://pay.digikita.id/api/orders'
 const checkoutBaseUrl = process.env.PAYKITA_CHECKOUT_URL || 'https://pay.digikita.id/pay'
@@ -63,6 +65,10 @@ export async function POST(request: Request) {
     const orderId = findValue(result, ['order_id', 'orderId', 'id'])
     const providerPaymentUrl = findValue(result, ['payment_url', 'paymentUrl', 'redirect_url', 'redirectUrl'])
     const checkoutUrl = providerPaymentUrl || (orderId ? `${checkoutBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(orderId)}` : undefined)
+    await query(
+      'INSERT INTO ticket_orders (id, provider_order_id, name, email, phone, quantity, amount, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (provider_order_id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, phone = EXCLUDED.phone, quantity = EXCLUDED.quantity, amount = EXCLUDED.amount, updated_at = now()',
+      [randomUUID(), orderId, body.buyer?.name || 'Pembeli Dwipantara', body.buyer?.email, body.buyer?.phone, Number(body.quantity || 1), Number(body.amount || 0), 'pending'],
+    )
     return NextResponse.json({
       qris,
       qrImage,
