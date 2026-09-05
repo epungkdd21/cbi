@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const paymentEndpoint = process.env.PAYKITA_API_URL || 'https://pay.digikita.id/api/orders'
-const checkoutBaseUrl = process.env.PAYKITA_CHECKOUT_URL || 'https://pay.digikita.id/checkout'
+const checkoutBaseUrl = process.env.PAYKITA_CHECKOUT_URL || 'https://pay.digikita.id/pay'
 
 function readable(value: unknown): string | undefined {
   if (typeof value === 'string') return value
