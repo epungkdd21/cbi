@@ -105,7 +105,7 @@ export default function Page() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="ticket-page min-h-screen bg-background text-foreground">
       <header className="border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 lg:px-8">
           <div className="flex items-center gap-3">
